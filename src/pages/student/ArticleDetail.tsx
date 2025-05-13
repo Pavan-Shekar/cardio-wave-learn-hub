@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { databaseService, Article } from "@/services/databaseService";
+import { articleService, Article } from "@/services";
 
 const sidebarItems = [
   { title: "Dashboard", href: "/student" },
@@ -27,7 +27,7 @@ const ArticleDetail = () => {
     if (id) {
       // Simulate loading delay
       setTimeout(() => {
-        const fetchedArticle = databaseService.getArticleById(id);
+        const fetchedArticle = articleService.getArticleById(id);
         setArticle(fetchedArticle);
         setLoading(false);
       }, 500);

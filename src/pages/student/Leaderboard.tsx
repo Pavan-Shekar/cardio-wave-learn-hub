@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { databaseService } from "@/services/databaseService";
+import { leaderboardService, LeaderboardEntry } from "@/services";
 
 const sidebarItems = [
   { title: "Dashboard", href: "/student" },
@@ -12,13 +11,6 @@ const sidebarItems = [
   { title: "Quizzes", href: "/student/quizzes" },
   { title: "Leaderboard", href: "/student/leaderboard" },
 ];
-
-interface LeaderboardEntry {
-  userId: string;
-  userName: string;
-  totalScore: number;
-  quizzesTaken: number;
-}
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -30,7 +22,7 @@ const Leaderboard = () => {
   useEffect(() => {
     // Simulate loading delay
     setTimeout(() => {
-      const data = databaseService.getLeaderboard();
+      const data = leaderboardService.getLeaderboard();
       setLeaderboard(data);
       setLoading(false);
     }, 500);
