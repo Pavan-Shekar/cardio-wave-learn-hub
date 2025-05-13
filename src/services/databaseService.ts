@@ -59,7 +59,7 @@ const initializeMockData = () => {
       {
         id: '1',
         title: 'Understanding the Basics of ECG',
-        content: 'An electrocardiogram (ECG) is a simple test that can be used to check your heart's rhythm and electrical activity...',
+        content: 'An electrocardiogram (ECG) is a simple test that can be used to check your heart\'s rhythm and electrical activity...',
         author: 'Dr. Smith',
         date: '2023-01-15',
         imageUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
