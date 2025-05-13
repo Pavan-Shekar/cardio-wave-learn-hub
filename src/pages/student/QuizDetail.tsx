@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { databaseService, Quiz } from "@/services/databaseService";
+import { quizService, Quiz } from "@/services";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
@@ -37,7 +37,7 @@ const QuizDetail = () => {
     if (id) {
       // Simulate loading delay
       setTimeout(() => {
-        const fetchedQuiz = databaseService.getQuizById(id);
+        const fetchedQuiz = quizService.getQuizById(id);
         setQuiz(fetchedQuiz);
         
         if (fetchedQuiz) {
@@ -87,7 +87,7 @@ const QuizDetail = () => {
     
     // Save quiz result
     if (currentUser) {
-      databaseService.saveQuizResult({
+      quizService.saveQuizResult({
         userId: currentUser.id,
         quizId: quiz.id,
         score: correct,

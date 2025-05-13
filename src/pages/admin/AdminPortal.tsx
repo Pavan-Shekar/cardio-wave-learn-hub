@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { databaseService } from "@/services/databaseService";
+import { userService, articleService, quizService, videoService } from "@/services";
 
 const sidebarItems = [
   { title: "Dashboard", href: "/admin" },
@@ -21,9 +20,9 @@ const AdminPortal = () => {
   // Protect this route for admins only
   useAuthRedirect("admin");
 
-  const users = databaseService.getUsers();
-  const articles = databaseService.getArticles();
-  const quizzes = databaseService.getQuizzes();
+  const users = userService.getUsers();
+  const articles = articleService.getArticles();
+  const quizzes = quizService.getQuizzes();
   
   return (
     <DashboardLayout sidebarItems={sidebarItems} title="Admin Portal">
@@ -132,7 +131,7 @@ const AdminPortal = () => {
             <div className="flex justify-between">
               <span className="text-sm font-medium">Videos</span>
               <span className="text-sm bg-ecg-light text-ecg-primary px-2 py-0.5 rounded-full">
-                {databaseService.getVideos().length}
+                {videoService.getVideos().length}
               </span>
             </div>
             <div className="flex justify-between">

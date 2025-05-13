@@ -1,6 +1,5 @@
-
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { databaseService } from "../services/databaseService";
+import { userService } from "../services";
 
 type UserRole = "student" | "admin" | null;
 
@@ -70,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem("ecgUser", JSON.stringify(user));
     
     // Save user to our mock database
-    const dbUser = databaseService.createUser({
+    const dbUser = userService.createUser({
       name: user.name,
       email: user.email,
       role: user.role as "student" | "admin", // Type assertion for the database
@@ -107,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem("ecgUser", JSON.stringify(user));
     
     // Save user to our mock database
-    const dbUser = databaseService.createUser({
+    const dbUser = userService.createUser({
       name: user.name,
       email: user.email,
       role: user.role as "student" | "admin", // Type assertion for the database

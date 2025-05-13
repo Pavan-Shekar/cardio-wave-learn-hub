@@ -1,12 +1,11 @@
-
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { databaseService } from "@/services/databaseService";
+import { articleService, quizService, videoService } from "@/services";
 
 const sidebarItems = [
   { title: "Dashboard", href: "/student" },
@@ -23,8 +22,23 @@ const StudentPortal = () => {
   // Protect this route for students only
   useAuthRedirect("student");
   
-  const articles = databaseService.getArticles().slice(0, 3); // Get latest 3
-  const quizzes = databaseService.getQuizzes().slice(0, 3); // Get latest 3
+  const [articles, setArticles] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      const articlesData = await articleService.getArticles();
+      setArticles(articlesData.slice(0, 3)); // Get latest 3
+    };
+
+    const fetchQuizzes = async () => {
+      const quizzesData = await quizService.getQuizzes();
+      setQuizzes(quizzesData.slice(0, 3)); // Get latest 3
+    };
+
+    fetchArticles();
+    fetchQuizzes();
+  }, []);
 
   return (
     <DashboardLayout sidebarItems={sidebarItems} title="Student Portal">
