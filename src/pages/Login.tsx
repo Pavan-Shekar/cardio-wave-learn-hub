@@ -16,7 +16,19 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, currentUser } = useAuth();
+  
+  // Check if user is already logged in
+  React.useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      // Navigate based on role
+      if (currentUser.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/student");
+      }
+    }
+  }, [isAuthenticated, currentUser, navigate]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,9 +42,9 @@ const Login = () => {
         
         // Navigate based on role
         if (role === "admin") {
-          navigate("/admin");
+          navigate("/admin", { replace: true });
         } else {
-          navigate("/student");
+          navigate("/student", { replace: true });
         }
       } else {
         toast.error("Login failed. Please check your credentials.");
