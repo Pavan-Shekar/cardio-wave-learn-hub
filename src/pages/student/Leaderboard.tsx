@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { leaderboardService, LeaderboardEntry } from "@/services";
+import { Trophy } from "lucide-react";
 
 const sidebarItems = [
   { title: "Dashboard", href: "/student" },
@@ -23,6 +25,7 @@ const Leaderboard = () => {
     // Simulate loading delay
     setTimeout(() => {
       const data = leaderboardService.getLeaderboard();
+      console.log("Leaderboard data:", data);
       setLeaderboard(data);
       setLoading(false);
     }, 500);
@@ -31,7 +34,10 @@ const Leaderboard = () => {
   return (
     <DashboardLayout sidebarItems={sidebarItems} title="Student Portal">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Leaderboard</h1>
+        <div className="flex items-center gap-2 mb-2">
+          <Trophy className="h-8 w-8 text-yellow-500" />
+          <h1 className="text-3xl font-bold text-gray-800">Leaderboard</h1>
+        </div>
         <p className="text-gray-500 mb-8">See how you rank among other students</p>
         
         <Card>

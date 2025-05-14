@@ -19,6 +19,7 @@ import AdminPortal from "./pages/admin/AdminPortal";
 import StudentPortal from "./pages/student/StudentPortal";
 import Articles from "./pages/student/Articles";
 import Videos from "./pages/student/Videos";
+import Quizzes from "./pages/student/Quizzes";
 import QuizDetail from "./pages/student/QuizDetail";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/student/articles" element={<Articles />} />
             <Route path="/student/articles/:id" element={<ArticleDetail />} />
             <Route path="/student/videos" element={<Videos />} />
+            <Route path="/student/quizzes" element={<Quizzes />} />
             <Route path="/student/quizzes/:id" element={<QuizDetail />} />
             <Route path="/student/leaderboard" element={<Leaderboard />} />
             
