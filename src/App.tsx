@@ -14,6 +14,8 @@ import Leaderboard from "./pages/student/Leaderboard";
 
 // Admin pages
 import AdminPortal from "./pages/admin/AdminPortal";
+import ManageUsers from "./pages/admin/ManageUsers";
+import ManageContent from "./pages/admin/ManageContent";
 
 // Student pages
 import StudentPortal from "./pages/student/StudentPortal";
@@ -38,6 +40,8 @@ const App = () => (
             
             {/* Admin routes */}
             <Route path="/admin" element={<AdminPortal />} />
+            <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/content" element={<ManageContent />} />
             
             {/* Student routes */}
             <Route path="/student" element={<StudentPortal />} />
