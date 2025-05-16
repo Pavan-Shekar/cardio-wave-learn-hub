@@ -1,5 +1,7 @@
+
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { userService } from "../services";
+import { toast } from "sonner";
 
 type UserRole = "student" | "admin" | null;
 
@@ -50,30 +52,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Mock validation
-    if (!email || !password || !role) return false;
-    
-    // For demo: if role is admin, email must contain "admin"
-    if (role === "admin" && !email.includes("admin")) {
+    if (!email || !password || !role) {
+      toast.error("Please fill all required fields");
       return false;
     }
     
-    // Create a mock user
-    const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: email.split('@')[0],
-      email,
-      role,
-    };
+    // For demo: if role is admin, email must contain "admin"
+    if (role === "admin" && !email.includes("admin")) {
+      toast.error("Admin accounts must use an email containing 'admin'");
+      return false;
+    }
+    
+    // Check if user exists in our mock database
+    const users = userService.getUsers();
+    const existingUser = users.find(u => u.email === email);
+    
+    let user: User;
+    
+    if (existingUser) {
+      // Check if role matches
+      if (existingUser.role !== role) {
+        toast.error(`This email is registered as a ${existingUser.role}, not a ${role}`);
+        return false;
+      }
+      
+      // Use existing user
+      user = {
+        id: existingUser.id,
+        name: existingUser.name,
+        email: existingUser.email,
+        role: existingUser.role as "student" | "admin",
+      };
+    } else {
+      // Create a mock user
+      user = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: email.split('@')[0],
+        email,
+        role,
+      };
+      
+      // Save user to our mock database
+      userService.createUser({
+        name: user.name,
+        email: user.email,
+        role: user.role as "student" | "admin", // Type assertion for the database
+      });
+    }
     
     // Save user to localStorage
     localStorage.setItem("ecgUser", JSON.stringify(user));
-    
-    // Save user to our mock database
-    const dbUser = userService.createUser({
-      name: user.name,
-      email: user.email,
-      role: user.role as "student" | "admin", // Type assertion for the database
-    });
     
     // Update state
     setCurrentUser(user);
@@ -87,14 +115,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Mock validation
-    if (!name || !email || !password || !role) return false;
-    
-    // For demo: if role is admin, email must contain "admin"
-    if (role === "admin" && !email.includes("admin")) {
+    if (!name || !email || !password || !role) {
+      toast.error("Please fill all required fields");
       return false;
     }
     
-    // Create a mock user
+    // For demo: if role is admin, email must contain "admin"
+    if (role === "admin" && !email.includes("admin")) {
+      toast.error("Admin accounts must use an email containing 'admin'");
+      return false;
+    }
+    
+    // Check if user already exists
+    const users = userService.getUsers();
+    const existingUser = users.find(u => u.email === email);
+    
+    if (existingUser) {
+      toast.error("Email already registered. Please log in instead.");
+      return false;
+    }
+    
+    // Create a new user
     const user: User = {
       id: Math.random().toString(36).substr(2, 9),
       name,
@@ -106,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem("ecgUser", JSON.stringify(user));
     
     // Save user to our mock database
-    const dbUser = userService.createUser({
+    userService.createUser({
       name: user.name,
       email: user.email,
       role: user.role as "student" | "admin", // Type assertion for the database
