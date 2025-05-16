@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Waves } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 export const EcgAnimation: React.FC = () => {
   return (
@@ -10,48 +10,34 @@ export const EcgAnimation: React.FC = () => {
         <div className="w-32 h-32 rounded-full bg-sky-100/50 animate-pulse"></div>
       </div>
       
-      {/* Main ECG Line Animation */}
+      {/* Realistic ECG Line Animation */}
       <svg
-        className="w-full h-full animate-ecg-wave"
-        viewBox="0 0 1200 100"
+        className="w-full h-full"
+        viewBox="0 0 1000 100"
         preserveAspectRatio="none"
         style={{ width: '200%', position: 'absolute', left: '0' }}
       >
         <path
-          d="M0,50 L30,50 L45,20 L60,80 L75,20 L90,80 L105,50 L120,50 L200,50 L220,50 L230,20 L240,80 L250,50 L300,50 L400,50 L410,50 L420,20 L430,80 L440,50 L600,50 L800,50 L820,50 L830,20 L840,80 L850,50 L900,50 L1000,50 L1010,50 L1020,20 L1030,80 L1040,50 L1200,50"
+          className="animate-ecg-wave"
+          d="M0,50 L100,50 L110,50 L120,20 L130,80 L140,20 L150,80 L160,50 L170,50 L180,50 L190,50 L200,50 L210,50 L220,50 L230,50 L240,50 L250,50 L260,50 L270,50 L280,50 L290,50 L300,50 L310,50 L320,50 L330,50 L340,50 L350,50 L360,50 L370,50 L380,50 L390,50 L400,50 L410,50 L420,20 L430,80 L440,20 L450,80 L460,50 L470,50 L480,50 L490,50 L500,50 L510,50 L520,50 L530,50 L540,50 L550,50 L560,50 L570,50 L580,50 L590,50 L600,50 L610,50 L620,50 L630,50 L640,50 L650,50 L660,50 L670,50 L680,50 L690,50 L700,50 L710,50 L720,20 L730,80 L740,20 L750,80 L760,50 L770,50 L780,50 L790,50 L800,50 L810,50 L820,50 L830,50 L840,50 L850,50 L860,50 L870,50 L880,50 L890,50 L900,50 L910,50 L920,50 L930,50 L940,50 L950,50 L960,50 L970,50 L980,50 L990,50 L1000,50"
           fill="none"
           stroke="#0ea5e9"
           strokeWidth="2"
-          className="animate-pulse"
-        />
-      </svg>
-      <svg
-        className="w-full h-full animate-ecg-wave"
-        viewBox="0 0 1200 100"
-        preserveAspectRatio="none"
-        style={{ width: '200%', position: 'absolute', left: '100%' }}
-      >
-        <path
-          d="M0,50 L30,50 L45,20 L60,80 L75,20 L90,80 L105,50 L120,50 L200,50 L220,50 L230,20 L240,80 L250,50 L300,50 L400,50 L410,50 L420,20 L430,80 L440,50 L600,50 L800,50 L820,50 L830,20 L840,80 L850,50 L900,50 L1000,50 L1010,50 L1020,20 L1030,80 L1040,50 L1200,50"
-          fill="none"
-          stroke="#0ea5e9"
-          strokeWidth="2"
-          className="animate-pulse"
         />
       </svg>
       
-      {/* Heartbeat Effect */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-30">
-        <Waves className="text-sky-500 w-6 h-6 animate-pulse" />
+      {/* Heartbeat Icon Effect */}
+      <div className="absolute bottom-2 right-2 opacity-50">
+        <Heart className="text-red-500 w-5 h-5 animate-pulse" />
       </div>
       
       {/* Grid Lines */}
       <div className="absolute inset-0">
-        {Array.from({ length: 12 }).map((_, i) => (
+        {Array.from({ length: 10 }).map((_, i) => (
           <div 
             key={`v-${i}`}
             className="absolute h-full w-px bg-sky-100" 
-            style={{ left: `${i * 8.33}%` }}
+            style={{ left: `${i * 10}%` }}
           />
         ))}
         {Array.from({ length: 5 }).map((_, i) => (

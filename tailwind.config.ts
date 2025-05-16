@@ -88,13 +88,13 @@ export default {
 				},
 				'ecg-wave': {
 					'0%': { transform: 'translateX(0%)' },
-					'100%': { transform: 'translateX(-100%)' }
+					'100%': { transform: 'translateX(-50%)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'ecg-wave': 'ecg-wave 10s linear infinite'
+				'ecg-wave': 'ecg-wave 5s linear infinite'
 			}
 		}
 	},
