@@ -1,9 +1,16 @@
 
 import React from 'react';
+import { Waves } from 'lucide-react';
 
 export const EcgAnimation: React.FC = () => {
   return (
-    <div className="w-full h-16 bg-gray-100 rounded-md overflow-hidden relative">
+    <div className="w-full h-16 bg-gradient-to-r from-sky-50 to-white rounded-md overflow-hidden relative">
+      {/* Background Pulse Effect */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-32 h-32 rounded-full bg-sky-100/50 animate-pulse"></div>
+      </div>
+      
+      {/* Main ECG Line Animation */}
       <svg
         className="w-full h-full animate-ecg-wave"
         viewBox="0 0 1200 100"
@@ -15,6 +22,7 @@ export const EcgAnimation: React.FC = () => {
           fill="none"
           stroke="#0ea5e9"
           strokeWidth="2"
+          className="animate-pulse"
         />
       </svg>
       <svg
@@ -28,9 +36,34 @@ export const EcgAnimation: React.FC = () => {
           fill="none"
           stroke="#0ea5e9"
           strokeWidth="2"
+          className="animate-pulse"
         />
       </svg>
-      <div className="absolute inset-0 border-b border-ecg-primary/20"></div>
+      
+      {/* Heartbeat Effect */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-30">
+        <Waves className="text-sky-500 w-6 h-6 animate-pulse" />
+      </div>
+      
+      {/* Grid Lines */}
+      <div className="absolute inset-0">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div 
+            key={`v-${i}`}
+            className="absolute h-full w-px bg-sky-100" 
+            style={{ left: `${i * 8.33}%` }}
+          />
+        ))}
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div 
+            key={`h-${i}`}
+            className="absolute w-full h-px bg-sky-100" 
+            style={{ top: `${i * 25}%` }}
+          />
+        ))}
+      </div>
+      
+      <div className="absolute inset-0 border-b border-sky-200/20"></div>
     </div>
   );
 };
