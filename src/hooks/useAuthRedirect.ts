@@ -20,13 +20,16 @@ export const useAuthRedirect = (requiredRole?: 'student' | 'admin' | null) => {
     if (requiredRole && currentUser?.role !== requiredRole) {
       toast.error(`You need ${requiredRole} access for this page`);
       
+      // Redirect based on user's actual role
       if (currentUser?.role === 'admin') {
         navigate('/admin');
       } else if (currentUser?.role === 'student') {
         navigate('/student');
       } else {
+        // If no recognized role, send to login
         navigate('/login');
       }
+      return;
     }
   }, [isAuthenticated, currentUser, requiredRole, navigate]);
 
