@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,6 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => navigate("/register")}
-              variant="outline"
               className="text-white bg-blue-600 hover:bg-blue-700 px-8 rounded-full text-lg"
             >
               Register Now
