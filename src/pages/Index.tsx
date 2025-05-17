@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => navigate("/login")}
-              className="text-lg px-8 bg-ecg-primary hover:bg-ecg-secondary"
+              className="text-lg px-8"
             >
               Sign In
             </Button>
@@ -36,7 +37,8 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => navigate("/register")}
-              className="text-white bg-blue-600 hover:bg-blue-700 px-8 rounded-full text-lg"
+              className="text-lg px-8"
+              variant="outline"
             >
               Register Now
             </Button>
@@ -117,7 +119,7 @@ const Index = () => {
           <Button 
             size="lg" 
             onClick={() => navigate("/register")}
-            className="text-lg px-8 bg-ecg-primary hover:bg-ecg-secondary"
+            className="text-lg px-8"
           >
             Create Free Account
           </Button>
