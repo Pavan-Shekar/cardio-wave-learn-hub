@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { videoService, Video } from "@/services";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,8 @@ import { toast } from "sonner";
 import { Edit, FileX, Plus } from "lucide-react";
 
 const VideosTab = () => {
-  const [videos, setVideos] = useState<Video[]>(videoService.getVideos());
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editVideo, setEditVideo] = useState<Video | null>(null);
   const [newVideo, setNewVideo] = useState<Omit<Video, 'id'>>({
     title: '',
@@ -21,6 +22,11 @@ const VideosTab = () => {
     thumbnail: ''
   });
   const [videoDialogOpen, setVideoDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setVideos(videoService.getVideos());
+    setLoading(false);
+  }, []);
 
   const handleDeleteVideo = (id: string) => {
     if (window.confirm("Are you sure you want to delete this video?")) {
@@ -102,53 +108,57 @@ const VideosTab = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-sm border-b">
-                  <th className="pb-2 font-medium">Title</th>
-                  <th className="pb-2 font-medium">Category</th>
-                  <th className="pb-2 font-medium">URL</th>
-                  <th className="pb-2 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {videos.map(video => (
-                  <tr key={video.id} className="text-sm">
-                    <td className="py-3">{video.title}</td>
-                    <td className="py-3">{video.category}</td>
-                    <td className="py-3 truncate max-w-[200px]">{video.url}</td>
-                    <td className="py-3">
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEditVideo(video)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDeleteVideo(video.id)}
-                        >
-                          <FileX className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
+          {loading ? (
+            <div className="py-4 text-center">Loading videos...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-sm border-b">
+                    <th className="pb-2 font-medium">Title</th>
+                    <th className="pb-2 font-medium">Category</th>
+                    <th className="pb-2 font-medium">URL</th>
+                    <th className="pb-2 font-medium">Actions</th>
                   </tr>
-                ))}
-                
-                {videos.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="py-3 text-center text-sm text-gray-500">
-                      No videos available
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y">
+                  {videos.map(video => (
+                    <tr key={video.id} className="text-sm">
+                      <td className="py-3">{video.title}</td>
+                      <td className="py-3">{video.category}</td>
+                      <td className="py-3 truncate max-w-[200px]">{video.url}</td>
+                      <td className="py-3">
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditVideo(video)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteVideo(video.id)}
+                          >
+                            <FileX className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  
+                  {videos.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="py-3 text-center text-sm text-gray-500">
+                        No videos available
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

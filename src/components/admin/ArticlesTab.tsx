@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { articleService, Article } from "@/services";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,8 @@ import { toast } from "sonner";
 import { Edit, FileX, Plus } from "lucide-react";
 
 const ArticlesTab = () => {
-  const [articles, setArticles] = useState<Article[]>(articleService.getArticles());
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editArticle, setEditArticle] = useState<Article | null>(null);
   const [newArticle, setNewArticle] = useState<Omit<Article, 'id' | 'date'>>({
     title: '',
@@ -21,6 +22,11 @@ const ArticlesTab = () => {
     imageUrl: ''
   });
   const [articleDialogOpen, setArticleDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setArticles(articleService.getArticles());
+    setLoading(false);
+  }, []);
 
   const handleDeleteArticle = (id: string) => {
     if (window.confirm("Are you sure you want to delete this article?")) {
@@ -99,55 +105,59 @@ const ArticlesTab = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-sm border-b">
-                  <th className="pb-2 font-medium">Title</th>
-                  <th className="pb-2 font-medium">Author</th>
-                  <th className="pb-2 font-medium">Category</th>
-                  <th className="pb-2 font-medium">Date</th>
-                  <th className="pb-2 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {articles.map(article => (
-                  <tr key={article.id} className="text-sm">
-                    <td className="py-3">{article.title}</td>
-                    <td className="py-3">{article.author}</td>
-                    <td className="py-3">{article.category}</td>
-                    <td className="py-3">{new Date(article.date).toLocaleDateString()}</td>
-                    <td className="py-3">
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEditArticle(article)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDeleteArticle(article.id)}
-                        >
-                          <FileX className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
+          {loading ? (
+            <div className="py-4 text-center">Loading articles...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-sm border-b">
+                    <th className="pb-2 font-medium">Title</th>
+                    <th className="pb-2 font-medium">Author</th>
+                    <th className="pb-2 font-medium">Category</th>
+                    <th className="pb-2 font-medium">Date</th>
+                    <th className="pb-2 font-medium">Actions</th>
                   </tr>
-                ))}
-                
-                {articles.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-3 text-center text-sm text-gray-500">
-                      No articles available
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y">
+                  {articles.map(article => (
+                    <tr key={article.id} className="text-sm">
+                      <td className="py-3">{article.title}</td>
+                      <td className="py-3">{article.author}</td>
+                      <td className="py-3">{article.category}</td>
+                      <td className="py-3">{new Date(article.date).toLocaleDateString()}</td>
+                      <td className="py-3">
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditArticle(article)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteArticle(article.id)}
+                          >
+                            <FileX className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  
+                  {articles.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-3 text-center text-sm text-gray-500">
+                        No articles available
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

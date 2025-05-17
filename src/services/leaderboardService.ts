@@ -1,39 +1,47 @@
 
-import { quizService } from './quizService';
-import { userService } from './userService';
+import { getFromStorage } from './baseService';
+import { quizService, QuizResult } from '.';
+import { userService } from '.';
 
 export interface LeaderboardEntry {
   userId: string;
-  userName: string;
+  username: string;
   totalScore: number;
-  quizzesTaken: number;
+  completedQuizzes: number;
 }
 
 export const leaderboardService = {
   getLeaderboard: (): LeaderboardEntry[] => {
-    const results = quizService.getQuizResults();
+    const quizResults = quizService.getQuizResults();
     const users = userService.getUsers();
     
-    // Group results by userId
-    const userScores: Record<string, { totalScore: number; quizzesTaken: number }> = {};
+    // Group results by user
+    const userScores: { [userId: string]: { totalScore: number, completedQuizzes: number } } = {};
     
-    results.forEach(result => {
+    quizResults.forEach(result => {
       if (!userScores[result.userId]) {
-        userScores[result.userId] = { totalScore: 0, quizzesTaken: 0 };
+        userScores[result.userId] = {
+          totalScore: 0,
+          completedQuizzes: 0
+        };
       }
+      
       userScores[result.userId].totalScore += result.score;
-      userScores[result.userId].quizzesTaken += 1;
+      userScores[result.userId].completedQuizzes += 1;
     });
     
-    // Convert to array and add user names
-    return Object.entries(userScores).map(([userId, stats]) => {
+    // Convert to array and add usernames
+    const leaderboard: LeaderboardEntry[] = Object.keys(userScores).map(userId => {
       const user = users.find(u => u.id === userId);
       return {
         userId,
-        userName: user?.name || 'Unknown User',
-        totalScore: stats.totalScore,
-        quizzesTaken: stats.quizzesTaken
+        username: user ? user.name : 'Unknown User',
+        totalScore: userScores[userId].totalScore,
+        completedQuizzes: userScores[userId].completedQuizzes
       };
-    }).sort((a, b) => b.totalScore - a.totalScore);
+    });
+    
+    // Sort by score (highest first)
+    return leaderboard.sort((a, b) => b.totalScore - a.totalScore);
   }
 };

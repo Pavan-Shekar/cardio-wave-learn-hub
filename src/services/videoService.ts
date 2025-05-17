@@ -37,148 +37,40 @@ const mockVideos: Video[] = [
 initializeStorage(VIDEO_STORAGE_KEY, mockVideos);
 
 export const videoService = {
-  getVideos: async (): Promise<Video[]> => {
-    try {
-      // Try to get videos from Supabase
-      const { data, error } = await supabase
-        .from('videos')
-        .select('*');
-      
-      if (error || !data || data.length === 0) {
-        // Fallback to localStorage if Supabase fails or has no data
-        console.log("Falling back to localStorage for videos");
-        return getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-      }
-      
-      return data as Video[];
-    } catch (error) {
-      console.error("Error fetching videos:", error);
-      // Fallback to localStorage
-      return getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-    }
+  getVideos: (): Video[] => {
+    return getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
   },
   
-  getVideoById: async (id: string): Promise<Video | null> => {
-    try {
-      // Try to get video from Supabase
-      const { data, error } = await supabase
-        .from('videos')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error || !data) {
-        // Fallback to localStorage
-        console.log("Falling back to localStorage for video");
-        const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-        return videos.find(video => video.id === id) || null;
-      }
-      
-      return data as Video;
-    } catch (error) {
-      console.error("Error fetching video by id:", error);
-      // Fallback to localStorage
-      const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-      return videos.find(video => video.id === id) || null;
-    }
+  getVideoById: (id: string): Video | null => {
+    const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
+    return videos.find(video => video.id === id) || null;
   },
   
-  createVideo: async (video: Omit<Video, 'id'>): Promise<Video> => {
-    try {
-      const newVideo: Video = {
-        ...video,
-        id: Math.random().toString(36).substr(2, 9)
-      };
-      
-      // Try to create video in Supabase
-      const { data, error } = await supabase
-        .from('videos')
-        .insert(newVideo)
-        .select()
-        .single();
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      // Also update localStorage for offline support
-      const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-      videos.push(newVideo);
+  createVideo: (video: Omit<Video, 'id'>): Video => {
+    const newVideo: Video = {
+      ...video,
+      id: Math.random().toString(36).substr(2, 9)
+    };
+    
+    const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
+    videos.push(newVideo);
+    setInStorage(VIDEO_STORAGE_KEY, videos);
+    return newVideo;
+  },
+  
+  updateVideo: (video: Video): Video => {
+    const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
+    const index = videos.findIndex(v => v.id === video.id);
+    if (index !== -1) {
+      videos[index] = video;
       setInStorage(VIDEO_STORAGE_KEY, videos);
-      
-      return data as Video;
-    } catch (error) {
-      console.error("Error creating video, using localStorage only:", error);
-      // Fallback to localStorage only
-      const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-      const newVideo: Video = {
-        ...video,
-        id: Math.random().toString(36).substr(2, 9)
-      };
-      videos.push(newVideo);
-      setInStorage(VIDEO_STORAGE_KEY, videos);
-      return newVideo;
     }
+    return video;
   },
   
-  updateVideo: async (video: Video): Promise<Video> => {
-    try {
-      // Try to update video in Supabase
-      const { data, error } = await supabase
-        .from('videos')
-        .update(video)
-        .eq('id', video.id)
-        .select()
-        .single();
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      // Also update localStorage
-      const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-      const index = videos.findIndex(v => v.id === video.id);
-      if (index !== -1) {
-        videos[index] = video;
-        setInStorage(VIDEO_STORAGE_KEY, videos);
-      }
-      
-      return data as Video;
-    } catch (error) {
-      console.error("Error updating video, using localStorage only:", error);
-      // Fallback to localStorage only
-      const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-      const index = videos.findIndex(v => v.id === video.id);
-      if (index !== -1) {
-        videos[index] = video;
-        setInStorage(VIDEO_STORAGE_KEY, videos);
-      }
-      return video;
-    }
-  },
-  
-  deleteVideo: async (id: string): Promise<void> => {
-    try {
-      // Try to delete video from Supabase
-      const { error } = await supabase
-        .from('videos')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      // Also update localStorage
-      const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-      const filtered = videos.filter(video => video.id !== id);
-      setInStorage(VIDEO_STORAGE_KEY, filtered);
-    } catch (error) {
-      console.error("Error deleting video, using localStorage only:", error);
-      // Fallback to localStorage only
-      const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
-      const filtered = videos.filter(video => video.id !== id);
-      setInStorage(VIDEO_STORAGE_KEY, filtered);
-    }
+  deleteVideo: (id: string): void => {
+    const videos = getFromStorage<Video[]>(VIDEO_STORAGE_KEY);
+    const filtered = videos.filter(video => video.id !== id);
+    setInStorage(VIDEO_STORAGE_KEY, filtered);
   }
 };

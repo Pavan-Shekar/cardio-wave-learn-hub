@@ -1,3 +1,4 @@
+
 import { initializeStorage, getFromStorage, setInStorage } from './baseService';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -48,152 +49,43 @@ const mockArticles: Article[] = [
 // Initialize articles
 initializeStorage(ARTICLE_STORAGE_KEY, mockArticles);
 
-// Hybrid approach - we'll keep localStorage for fallback but try to use Supabase
 export const articleService = {
-  getArticles: async (): Promise<Article[]> => {
-    try {
-      // Try to get articles from Supabase
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*');
-      
-      if (error || !data || data.length === 0) {
-        // Fallback to localStorage if Supabase fails or has no data
-        console.log("Falling back to localStorage for articles");
-        return getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-      }
-      
-      return data as Article[];
-    } catch (error) {
-      console.error("Error fetching articles:", error);
-      // Fallback to localStorage
-      return getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-    }
+  getArticles: (): Article[] => {
+    return getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
   },
   
-  getArticleById: async (id: string): Promise<Article | null> => {
-    try {
-      // Try to get article from Supabase
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error || !data) {
-        // Fallback to localStorage
-        console.log("Falling back to localStorage for article");
-        const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-        return articles.find(article => article.id === id) || null;
-      }
-      
-      return data as Article;
-    } catch (error) {
-      console.error("Error fetching article by id:", error);
-      // Fallback to localStorage
-      const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-      return articles.find(article => article.id === id) || null;
-    }
+  getArticleById: (id: string): Article | null => {
+    const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
+    return articles.find(article => article.id === id) || null;
   },
   
-  createArticle: async (article: Omit<Article, 'id' | 'date'>): Promise<Article> => {
-    try {
-      const newArticle: Article = {
-        ...article,
-        id: Math.random().toString(36).substr(2, 9),
-        date: new Date().toISOString()
-      };
-      
-      // Try to create article in Supabase
-      const { data, error } = await supabase
-        .from('articles')
-        .insert(newArticle)
-        .select()
-        .single();
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      // Also update localStorage for offline support
-      const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-      articles.push(newArticle);
+  createArticle: (article: Omit<Article, 'id' | 'date'>): Article => {
+    const newArticle: Article = {
+      ...article,
+      id: Math.random().toString(36).substr(2, 9),
+      date: new Date().toISOString()
+    };
+    
+    const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
+    articles.push(newArticle);
+    setInStorage(ARTICLE_STORAGE_KEY, articles);
+    
+    return newArticle;
+  },
+  
+  updateArticle: (article: Article): Article => {
+    const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
+    const index = articles.findIndex(a => a.id === article.id);
+    if (index !== -1) {
+      articles[index] = article;
       setInStorage(ARTICLE_STORAGE_KEY, articles);
-      
-      return data as Article;
-    } catch (error) {
-      console.error("Error creating article, using localStorage only:", error);
-      // Fallback to localStorage only
-      const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-      const newArticle: Article = {
-        ...article,
-        id: Math.random().toString(36).substr(2, 9),
-        date: new Date().toISOString()
-      };
-      articles.push(newArticle);
-      setInStorage(ARTICLE_STORAGE_KEY, articles);
-      return newArticle;
     }
+    return article;
   },
   
-  updateArticle: async (article: Article): Promise<Article> => {
-    try {
-      // Try to update article in Supabase
-      const { data, error } = await supabase
-        .from('articles')
-        .update(article)
-        .eq('id', article.id)
-        .select()
-        .single();
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      // Also update localStorage
-      const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-      const index = articles.findIndex(a => a.id === article.id);
-      if (index !== -1) {
-        articles[index] = article;
-        setInStorage(ARTICLE_STORAGE_KEY, articles);
-      }
-      
-      return data as Article;
-    } catch (error) {
-      console.error("Error updating article, using localStorage only:", error);
-      // Fallback to localStorage only
-      const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-      const index = articles.findIndex(a => a.id === article.id);
-      if (index !== -1) {
-        articles[index] = article;
-        setInStorage(ARTICLE_STORAGE_KEY, articles);
-      }
-      return article;
-    }
-  },
-  
-  deleteArticle: async (id: string): Promise<void> => {
-    try {
-      // Try to delete article from Supabase
-      const { error } = await supabase
-        .from('articles')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      // Also update localStorage
-      const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-      const filtered = articles.filter(article => article.id !== id);
-      setInStorage(ARTICLE_STORAGE_KEY, filtered);
-    } catch (error) {
-      console.error("Error deleting article, using localStorage only:", error);
-      // Fallback to localStorage only
-      const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
-      const filtered = articles.filter(article => article.id !== id);
-      setInStorage(ARTICLE_STORAGE_KEY, filtered);
-    }
+  deleteArticle: (id: string): void => {
+    const articles = getFromStorage<Article[]>(ARTICLE_STORAGE_KEY);
+    const filtered = articles.filter(article => article.id !== id);
+    setInStorage(ARTICLE_STORAGE_KEY, filtered);
   }
 };

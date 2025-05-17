@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,13 +17,20 @@ const sidebarItems = [
 const AdminPortal = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const [articles, setArticles] = useState<any[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [quizzes, setQuizzes] = useState<any[]>([]);
   
   // Protect this route for admins only
   useAuthRedirect("admin");
 
+  useEffect(() => {
+    setArticles(articleService.getArticles());
+    setVideos(videoService.getVideos());
+    setQuizzes(quizService.getQuizzes());
+  }, []);
+
   const users = userService.getUsers();
-  const articles = articleService.getArticles();
-  const quizzes = quizService.getQuizzes();
   
   return (
     <DashboardLayout sidebarItems={sidebarItems} title="Admin Portal">
@@ -131,7 +139,7 @@ const AdminPortal = () => {
             <div className="flex justify-between">
               <span className="text-sm font-medium">Videos</span>
               <span className="text-sm bg-ecg-light text-ecg-primary px-2 py-0.5 rounded-full">
-                {videoService.getVideos().length}
+                {videos.length}
               </span>
             </div>
             <div className="flex justify-between">
