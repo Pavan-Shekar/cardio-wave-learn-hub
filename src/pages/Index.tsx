@@ -29,7 +29,7 @@ const Index = () => {
             <Button 
               size="lg" 
               onClick={() => navigate("/login")}
-              className="text-lg px-8 bg-ecg-primary hover:bg-ecg-secondary"
+              className="text-white bg-blue-600 hover:bg-blue-700 px-8 rounded-full text-lg"
             >
               Sign In
             </Button>
@@ -38,7 +38,7 @@ const Index = () => {
               size="lg" 
               onClick={() => navigate("/register")}
               variant="outline"
-              className="text-lg px-8 text-ecg-primary border-ecg-primary hover:bg-ecg-light"
+              className="text-white bg-blue-600 hover:bg-blue-700 px-8 rounded-full text-lg"
             >
               Register Now
             </Button>
