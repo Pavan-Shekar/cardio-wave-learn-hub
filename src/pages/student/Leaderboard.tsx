@@ -84,10 +84,10 @@ const Leaderboard = () => {
                         </td>
                         <td className="py-3">
                           <div className={index < 3 ? "text-ecg-primary" : ""}>
-                            {entry.userName}
+                            {entry.username}
                           </div>
                         </td>
-                        <td className="py-3 text-right">{entry.quizzesTaken}</td>
+                        <td className="py-3 text-right">{entry.completedQuizzes}</td>
                         <td className="py-3 text-right font-medium">{entry.totalScore}</td>
                       </tr>
                     ))}
