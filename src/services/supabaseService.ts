@@ -51,6 +51,22 @@ export interface QuizResult {
   date: string;
 }
 
+// Helper function to safely convert JSON to Questions array
+const parseQuestions = (questionsJson: any): Question[] => {
+  try {
+    if (Array.isArray(questionsJson)) {
+      return questionsJson as Question[];
+    }
+    if (typeof questionsJson === 'string') {
+      return JSON.parse(questionsJson) as Question[];
+    }
+    return questionsJson || [];
+  } catch (error) {
+    console.error('Error parsing questions JSON:', error);
+    return [];
+  }
+};
+
 export const supabaseService = {
   // Profile methods
   async getProfile(userId: string): Promise<Profile | null> {
@@ -257,7 +273,7 @@ export const supabaseService = {
     }
     return (data || []).map(quiz => ({
       ...quiz,
-      questions: quiz.questions as Question[]
+      questions: parseQuestions(quiz.questions)
     }));
   },
 
@@ -274,7 +290,7 @@ export const supabaseService = {
     }
     return {
       ...data,
-      questions: data.questions as Question[]
+      questions: parseQuestions(data.questions)
     };
   },
 
@@ -294,7 +310,7 @@ export const supabaseService = {
     }
     return {
       ...data,
-      questions: data.questions as Question[]
+      questions: parseQuestions(data.questions)
     };
   },
 
@@ -315,7 +331,7 @@ export const supabaseService = {
     }
     return {
       ...data,
-      questions: data.questions as Question[]
+      questions: parseQuestions(data.questions)
     };
   },
 
