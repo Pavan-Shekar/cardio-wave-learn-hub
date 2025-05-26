@@ -22,13 +22,19 @@ const Leaderboard = () => {
   useAuthRedirect("student");
 
   useEffect(() => {
-    // Simulate loading delay
-    setTimeout(() => {
-      const data = leaderboardService.getLeaderboard();
-      console.log("Leaderboard data:", data);
-      setLeaderboard(data);
-      setLoading(false);
-    }, 500);
+    const fetchLeaderboard = async () => {
+      try {
+        const data = await leaderboardService.getLeaderboard();
+        console.log("Leaderboard data:", data);
+        setLeaderboard(data);
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
   }, []);
 
   return (

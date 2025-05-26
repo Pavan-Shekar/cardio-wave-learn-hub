@@ -25,12 +25,18 @@ const Videos = () => {
   useAuthRedirect("student");
   
   useEffect(() => {
-    // Simulate loading delay
-    setTimeout(() => {
-      const fetchedVideos = videoService.getVideos();
-      setVideos(fetchedVideos);
-      setLoading(false);
-    }, 500);
+    const fetchVideos = async () => {
+      try {
+        const fetchedVideos = await videoService.getVideos();
+        setVideos(fetchedVideos);
+      } catch (error) {
+        console.error('Error fetching videos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVideos();
   }, []);
 
   const getYoutubeVideoId = (url: string) => {

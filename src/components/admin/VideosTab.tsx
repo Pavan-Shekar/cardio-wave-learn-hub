@@ -23,16 +23,31 @@ const VideosTab = () => {
   });
   const [videoDialogOpen, setVideoDialogOpen] = useState(false);
 
+  const fetchVideos = async () => {
+    try {
+      const fetchedVideos = await videoService.getVideos();
+      setVideos(fetchedVideos);
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+      toast.error('Failed to load videos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setVideos(videoService.getVideos());
-    setLoading(false);
+    fetchVideos();
   }, []);
 
-  const handleDeleteVideo = (id: string) => {
+  const handleDeleteVideo = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this video?")) {
-      videoService.deleteVideo(id);
-      setVideos(videoService.getVideos());
-      toast.success("Video deleted successfully");
+      const success = await videoService.deleteVideo(id);
+      if (success) {
+        await fetchVideos();
+        toast.success("Video deleted successfully");
+      } else {
+        toast.error("Failed to delete video");
+      }
     }
   };
 
@@ -48,19 +63,29 @@ const VideosTab = () => {
     setVideoDialogOpen(true);
   };
 
-  const handleSaveVideo = () => {
+  const handleSaveVideo = async () => {
     try {
       if (editVideo) {
         // Update existing video
-        videoService.updateVideo({
+        const updated = await videoService.updateVideo({
           ...editVideo,
           ...newVideo
         });
-        toast.success("Video updated successfully");
+        if (updated) {
+          toast.success("Video updated successfully");
+        } else {
+          toast.error("Failed to update video");
+          return;
+        }
       } else {
         // Create new video
-        videoService.createVideo(newVideo);
-        toast.success("Video created successfully");
+        const created = await videoService.createVideo(newVideo);
+        if (created) {
+          toast.success("Video created successfully");
+        } else {
+          toast.error("Failed to create video");
+          return;
+        }
       }
       
       // Reset form and close dialog
@@ -75,10 +100,10 @@ const VideosTab = () => {
       setVideoDialogOpen(false);
       
       // Refresh videos list
-      setVideos(videoService.getVideos());
+      await fetchVideos();
     } catch (error) {
+      console.error('Error saving video:', error);
       toast.error("Failed to save video");
-      console.error(error);
     }
   };
 

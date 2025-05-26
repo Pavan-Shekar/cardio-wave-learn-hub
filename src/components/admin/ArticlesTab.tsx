@@ -23,16 +23,31 @@ const ArticlesTab = () => {
   });
   const [articleDialogOpen, setArticleDialogOpen] = useState(false);
 
+  const fetchArticles = async () => {
+    try {
+      const fetchedArticles = await articleService.getArticles();
+      setArticles(fetchedArticles);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+      toast.error('Failed to load articles');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setArticles(articleService.getArticles());
-    setLoading(false);
+    fetchArticles();
   }, []);
 
-  const handleDeleteArticle = (id: string) => {
+  const handleDeleteArticle = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this article?")) {
-      articleService.deleteArticle(id);
-      setArticles(articleService.getArticles());
-      toast.success("Article deleted successfully");
+      const success = await articleService.deleteArticle(id);
+      if (success) {
+        await fetchArticles();
+        toast.success("Article deleted successfully");
+      } else {
+        toast.error("Failed to delete article");
+      }
     }
   };
 
@@ -43,24 +58,34 @@ const ArticlesTab = () => {
       content: article.content,
       author: article.author,
       category: article.category,
-      imageUrl: article.imageUrl
+      imageUrl: article.imageUrl || ''
     });
     setArticleDialogOpen(true);
   };
 
-  const handleSaveArticle = () => {
+  const handleSaveArticle = async () => {
     try {
       if (editArticle) {
         // Update existing article
-        articleService.updateArticle({
+        const updated = await articleService.updateArticle({
           ...editArticle,
           ...newArticle
         });
-        toast.success("Article updated successfully");
+        if (updated) {
+          toast.success("Article updated successfully");
+        } else {
+          toast.error("Failed to update article");
+          return;
+        }
       } else {
         // Create new article
-        articleService.createArticle(newArticle);
-        toast.success("Article created successfully");
+        const created = await articleService.createArticle(newArticle);
+        if (created) {
+          toast.success("Article created successfully");
+        } else {
+          toast.error("Failed to create article");
+          return;
+        }
       }
       
       // Reset form and close dialog
@@ -75,10 +100,10 @@ const ArticlesTab = () => {
       setArticleDialogOpen(false);
       
       // Refresh articles list
-      setArticles(articleService.getArticles());
+      await fetchArticles();
     } catch (error) {
+      console.error('Error saving article:', error);
       toast.error("Failed to save article");
-      console.error(error);
     }
   };
 

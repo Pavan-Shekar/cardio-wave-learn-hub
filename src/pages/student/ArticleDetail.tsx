@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
@@ -24,14 +23,20 @@ const ArticleDetail = () => {
   useAuthRedirect("student");
   
   useEffect(() => {
-    if (id) {
-      // Simulate loading delay
-      setTimeout(() => {
-        const fetchedArticle = articleService.getArticleById(id);
-        setArticle(fetchedArticle);
-        setLoading(false);
-      }, 500);
-    }
+    const fetchArticle = async () => {
+      if (id) {
+        try {
+          const fetchedArticle = await articleService.getArticleById(id);
+          setArticle(fetchedArticle);
+        } catch (error) {
+          console.error('Error fetching article:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchArticle();
   }, [id]);
 
   if (loading) {
@@ -92,7 +97,6 @@ const ArticleDetail = () => {
         <div className="prose max-w-none">
           <p className="text-gray-700 whitespace-pre-line">{article.content}</p>
           
-          {/* Placeholder for longer content */}
           <p className="mt-4">
             The electrocardiogram (ECG) is an essential diagnostic tool in modern medicine. 
             It provides a graphical representation of the electrical activity of the heart over time, 

@@ -1,10 +1,5 @@
 
-import { initializeStorage, getFromStorage, setInStorage } from './baseService';
-
-const USER_STORAGE_KEY = 'ecgUsers';
-
-// Initialize empty users array if not present
-initializeStorage(USER_STORAGE_KEY, []);
+import { supabaseService } from './supabaseService';
 
 export interface User {
   id: string;
@@ -15,40 +10,55 @@ export interface User {
 }
 
 export const userService = {
-  getUsers: (): User[] => {
-    return getFromStorage<User[]>(USER_STORAGE_KEY);
+  getUsers: async (): Promise<User[]> => {
+    const profiles = await supabaseService.getProfiles();
+    return profiles.map(profile => ({
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      role: profile.role,
+      registeredDate: profile.created_at
+    }));
   },
   
-  getUserById: (id: string): User | null => {
-    const users = userService.getUsers();
-    return users.find(user => user.id === id) || null;
-  },
-  
-  createUser: (user: Omit<User, 'id' | 'registeredDate'>): User => {
-    const users = userService.getUsers();
-    const newUser: User = {
-      ...user,
-      id: Math.random().toString(36).substr(2, 9),
-      registeredDate: new Date().toISOString()
+  getUserById: async (id: string): Promise<User | null> => {
+    const profile = await supabaseService.getProfile(id);
+    if (!profile) return null;
+    return {
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      role: profile.role,
+      registeredDate: profile.created_at
     };
-    users.push(newUser);
-    setInStorage(USER_STORAGE_KEY, users);
-    return newUser;
   },
   
-  updateUser: (user: User): User => {
-    const users = userService.getUsers();
-    const index = users.findIndex(u => u.id === user.id);
-    if (index !== -1) {
-      users[index] = user;
-      setInStorage(USER_STORAGE_KEY, users);
-    }
-    return user;
+  createUser: async (user: Omit<User, 'id' | 'registeredDate'>): Promise<User | null> => {
+    // This will be handled by the Supabase trigger when user signs up
+    console.log('User creation handled by Supabase auth trigger');
+    return null;
   },
   
-  deleteUser: (id: string): void => {
-    const users = userService.getUsers();
-    const filtered = users.filter(user => user.id !== id);
-    setInStorage(USER_STORAGE_KEY, filtered);
+  updateUser: async (user: User): Promise<User | null> => {
+    const updatedProfile = await supabaseService.updateProfile({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    });
+    if (!updatedProfile) return null;
+    return {
+      id: updatedProfile.id,
+      name: updatedProfile.name,
+      email: updatedProfile.email,
+      role: updatedProfile.role,
+      registeredDate: updatedProfile.created_at
+    };
+  },
+  
+  deleteUser: async (id: string): Promise<boolean> => {
+    // Note: This should be handled through Supabase auth admin functions
+    console.log('User deletion should be handled through Supabase auth');
+    return false;
   }
 };

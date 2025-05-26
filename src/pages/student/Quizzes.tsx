@@ -25,12 +25,18 @@ const Quizzes = () => {
   useAuthRedirect("student");
   
   useEffect(() => {
-    // Simulate loading delay
-    setTimeout(() => {
-      const fetchedQuizzes = quizService.getQuizzes();
-      setQuizzes(fetchedQuizzes);
-      setLoading(false);
-    }, 500);
+    const fetchQuizzes = async () => {
+      try {
+        const fetchedQuizzes = await quizService.getQuizzes();
+        setQuizzes(fetchedQuizzes);
+      } catch (error) {
+        console.error('Error fetching quizzes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuizzes();
   }, []);
 
   return (

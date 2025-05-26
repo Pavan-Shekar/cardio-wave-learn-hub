@@ -1,11 +1,13 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { userService } from "../services";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
+import { supabaseService } from "@/services/supabaseService";
 import { toast } from "sonner";
 
 type UserRole = "student" | "admin" | null;
 
-interface User {
+interface AuthUser {
   id: string;
   name: string;
   email: string;
@@ -13,10 +15,10 @@ interface User {
 }
 
 interface AuthContextType {
-  currentUser: User | null;
+  currentUser: AuthUser | null;
   login: (email: string, password: string, role: UserRole) => Promise<boolean>;
   register: (name: string, email: string, password: string, role: UserRole) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
   isStudent: boolean;
@@ -33,137 +35,125 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   useEffect(() => {
-    // Check for saved user in localStorage on initial load
-    const savedUser = localStorage.getItem("ecgUser");
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
-      setIsAuthenticated(true);
-    }
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session);
+        setSession(session);
+        
+        if (session?.user) {
+          // Fetch user profile from our profiles table
+          const profile = await supabaseService.getProfile(session.user.id);
+          if (profile) {
+            setCurrentUser({
+              id: profile.id,
+              name: profile.name,
+              email: profile.email,
+              role: profile.role as UserRole
+            });
+            setIsAuthenticated(true);
+          }
+        } else {
+          setCurrentUser(null);
+          setIsAuthenticated(false);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSession(session);
+        // The onAuthStateChange will handle setting the user
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
-    // This is a mock authentication - in a real app, this would call an API
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock validation
-    if (!email || !password || !role) {
-      toast.error("Please fill all required fields");
-      return false;
-    }
-    
-    // For demo: if role is admin, email must contain "admin"
-    if (role === "admin" && !email.includes("admin")) {
-      toast.error("Admin accounts must use an email containing 'admin'");
-      return false;
-    }
-    
-    // Check if user exists in our mock database
-    const users = userService.getUsers();
-    const existingUser = users.find(u => u.email === email);
-    
-    let user: User;
-    
-    if (existingUser) {
-      // Check if role matches
-      if (existingUser.role !== role) {
-        toast.error(`This email is registered as a ${existingUser.role}, not a ${role}`);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        toast.error(error.message);
         return false;
       }
-      
-      // Use existing user
-      user = {
-        id: existingUser.id,
-        name: existingUser.name,
-        email: existingUser.email,
-        role: existingUser.role as "student" | "admin",
-      };
-    } else {
-      // Create a mock user
-      user = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: email.split('@')[0],
-        email,
-        role,
-      };
-      
-      // Save user to our mock database
-      userService.createUser({
-        name: user.name,
-        email: user.email,
-        role: user.role as "student" | "admin", // Type assertion for the database
-      });
+
+      if (data.user) {
+        // Check if user has the correct role
+        const profile = await supabaseService.getProfile(data.user.id);
+        if (profile && profile.role !== role) {
+          toast.error(`This email is registered as a ${profile.role}, not a ${role}`);
+          await supabase.auth.signOut();
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("An error occurred during login.");
+      return false;
     }
-    
-    // Save user to localStorage
-    localStorage.setItem("ecgUser", JSON.stringify(user));
-    
-    // Update state
-    setCurrentUser(user);
-    setIsAuthenticated(true);
-    
-    return true;
   };
 
   const register = async (name: string, email: string, password: string, role: UserRole): Promise<boolean> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock validation
-    if (!name || !email || !password || !role) {
-      toast.error("Please fill all required fields");
+    try {
+      // For demo: if role is admin, email must contain "admin"
+      if (role === "admin" && !email.includes("admin")) {
+        toast.error("Admin accounts must use an email containing 'admin'");
+        return false;
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role
+          }
+        }
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
+
+      if (data.user) {
+        toast.success("Registration successful! Please check your email to verify your account.");
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error("An error occurred during registration.");
       return false;
     }
-    
-    // For demo: if role is admin, email must contain "admin"
-    if (role === "admin" && !email.includes("admin")) {
-      toast.error("Admin accounts must use an email containing 'admin'");
-      return false;
-    }
-    
-    // Check if user already exists
-    const users = userService.getUsers();
-    const existingUser = users.find(u => u.email === email);
-    
-    if (existingUser) {
-      toast.error("Email already registered. Please log in instead.");
-      return false;
-    }
-    
-    // Create a new user
-    const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      name,
-      email,
-      role,
-    };
-    
-    // Save user to localStorage
-    localStorage.setItem("ecgUser", JSON.stringify(user));
-    
-    // Save user to our mock database
-    userService.createUser({
-      name: user.name,
-      email: user.email,
-      role: user.role as "student" | "admin", // Type assertion for the database
-    });
-    
-    // Update state
-    setCurrentUser(user);
-    setIsAuthenticated(true);
-    
-    return true;
   };
 
-  const logout = () => {
-    localStorage.removeItem("ecgUser");
-    setCurrentUser(null);
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+      setSession(null);
+      setIsAuthenticated(false);
+      toast.success("Logged out successfully");
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error("Error logging out");
+    }
   };
 
   const isAdmin = currentUser?.role === "admin";

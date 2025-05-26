@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
@@ -5,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { articleService, quizService, videoService } from "@/services";
+import { articleService, quizService } from "@/services";
 
 const sidebarItems = [
   { title: "Dashboard", href: "/student" },
@@ -27,13 +28,21 @@ const StudentPortal = () => {
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const articlesData = await articleService.getArticles();
-      setArticles(articlesData.slice(0, 3)); // Get latest 3
+      try {
+        const articlesData = await articleService.getArticles();
+        setArticles(articlesData.slice(0, 3)); // Get latest 3
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      }
     };
 
     const fetchQuizzes = async () => {
-      const quizzesData = await quizService.getQuizzes();
-      setQuizzes(quizzesData.slice(0, 3)); // Get latest 3
+      try {
+        const quizzesData = await quizService.getQuizzes();
+        setQuizzes(quizzesData.slice(0, 3)); // Get latest 3
+      } catch (error) {
+        console.error('Error fetching quizzes:', error);
+      }
     };
 
     fetchArticles();

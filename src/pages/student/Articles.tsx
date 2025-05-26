@@ -24,12 +24,18 @@ const Articles = () => {
   useAuthRedirect("student");
   
   useEffect(() => {
-    // Simulate loading delay
-    setTimeout(() => {
-      const fetchedArticles = articleService.getArticles();
-      setArticles(fetchedArticles);
-      setLoading(false);
-    }, 500);
+    const fetchArticles = async () => {
+      try {
+        const fetchedArticles = await articleService.getArticles();
+        setArticles(fetchedArticles);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
   }, []);
 
   if (loading) {

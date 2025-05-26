@@ -34,20 +34,25 @@ const QuizDetail = () => {
   useAuthRedirect("student");
   
   useEffect(() => {
-    if (id) {
-      // Simulate loading delay
-      setTimeout(() => {
-        const fetchedQuiz = quizService.getQuizById(id);
-        setQuiz(fetchedQuiz);
-        
-        if (fetchedQuiz) {
-          // Initialize selected answers array with nulls
-          setSelectedAnswers(new Array(fetchedQuiz.questions.length).fill(null));
+    const fetchQuiz = async () => {
+      if (id) {
+        try {
+          const fetchedQuiz = await quizService.getQuizById(id);
+          setQuiz(fetchedQuiz);
+          
+          if (fetchedQuiz) {
+            // Initialize selected answers array with nulls
+            setSelectedAnswers(new Array(fetchedQuiz.questions.length).fill(null));
+          }
+        } catch (error) {
+          console.error('Error fetching quiz:', error);
+        } finally {
+          setLoading(false);
         }
-        
-        setLoading(false);
-      }, 500);
-    }
+      }
+    };
+
+    fetchQuiz();
   }, [id]);
 
   const handleSelectAnswer = (answerIndex: number) => {
@@ -71,7 +76,7 @@ const QuizDetail = () => {
     }
   };
 
-  const calculateScore = () => {
+  const calculateScore = async () => {
     if (!quiz || !currentUser) return;
     
     let correct = 0;
@@ -86,13 +91,15 @@ const QuizDetail = () => {
     setScore({ correct, total });
     
     // Save quiz result
-    if (currentUser) {
-      quizService.saveQuizResult({
+    try {
+      await quizService.saveQuizResult({
         userId: currentUser.id,
         quizId: quiz.id,
         score: correct,
         totalQuestions: total,
       });
+    } catch (error) {
+      console.error('Error saving quiz result:', error);
     }
     
     setQuizCompleted(true);
