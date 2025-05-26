@@ -64,7 +64,10 @@ export const supabaseService = {
       console.error('Error fetching profile:', error);
       return null;
     }
-    return data;
+    return {
+      ...data,
+      role: data.role as "student" | "admin"
+    };
   },
 
   async getProfiles(): Promise<Profile[]> {
@@ -77,7 +80,10 @@ export const supabaseService = {
       console.error('Error fetching profiles:', error);
       return [];
     }
-    return data || [];
+    return (data || []).map(profile => ({
+      ...profile,
+      role: profile.role as "student" | "admin"
+    }));
   },
 
   async updateProfile(profile: Partial<Profile> & { id: string }): Promise<Profile | null> {
@@ -92,7 +98,10 @@ export const supabaseService = {
       console.error('Error updating profile:', error);
       return null;
     }
-    return data;
+    return {
+      ...data,
+      role: data.role as "student" | "admin"
+    };
   },
 
   // Article methods
@@ -246,7 +255,10 @@ export const supabaseService = {
       console.error('Error fetching quizzes:', error);
       return [];
     }
-    return data || [];
+    return (data || []).map(quiz => ({
+      ...quiz,
+      questions: quiz.questions as Question[]
+    }));
   },
 
   async getQuizById(id: string): Promise<Quiz | null> {
@@ -260,13 +272,19 @@ export const supabaseService = {
       console.error('Error fetching quiz:', error);
       return null;
     }
-    return data;
+    return {
+      ...data,
+      questions: data.questions as Question[]
+    };
   },
 
   async createQuiz(quiz: Omit<Quiz, 'id'>): Promise<Quiz | null> {
     const { data, error } = await supabase
       .from('quizzes')
-      .insert(quiz)
+      .insert({
+        ...quiz,
+        questions: quiz.questions as any
+      })
       .select()
       .single();
     
@@ -274,13 +292,19 @@ export const supabaseService = {
       console.error('Error creating quiz:', error);
       return null;
     }
-    return data;
+    return {
+      ...data,
+      questions: data.questions as Question[]
+    };
   },
 
   async updateQuiz(quiz: Quiz): Promise<Quiz | null> {
     const { data, error } = await supabase
       .from('quizzes')
-      .update(quiz)
+      .update({
+        ...quiz,
+        questions: quiz.questions as any
+      })
       .eq('id', quiz.id)
       .select()
       .single();
@@ -289,7 +313,10 @@ export const supabaseService = {
       console.error('Error updating quiz:', error);
       return null;
     }
-    return data;
+    return {
+      ...data,
+      questions: data.questions as Question[]
+    };
   },
 
   async deleteQuiz(id: string): Promise<boolean> {

@@ -11,8 +11,19 @@ const QuizzesTab = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setQuizzes(quizService.getQuizzes());
-    setLoading(false);
+    const fetchQuizzes = async () => {
+      try {
+        const fetchedQuizzes = await quizService.getQuizzes();
+        setQuizzes(fetchedQuizzes);
+      } catch (error) {
+        console.error('Error fetching quizzes:', error);
+        toast.error('Failed to load quizzes');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuizzes();
   }, []);
 
   return (

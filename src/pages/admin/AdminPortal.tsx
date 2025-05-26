@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { userService, articleService, quizService, videoService } from "@/services";
+import { userService, articleService, quizService, videoService, User } from "@/services";
 
 const sidebarItems = [
   { title: "Dashboard", href: "/admin" },
@@ -20,17 +20,45 @@ const AdminPortal = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [videos, setVideos] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Protect this route for admins only
   useAuthRedirect("admin");
 
   useEffect(() => {
-    setArticles(articleService.getArticles());
-    setVideos(videoService.getVideos());
-    setQuizzes(quizService.getQuizzes());
+    const fetchData = async () => {
+      try {
+        const [fetchedArticles, fetchedVideos, fetchedQuizzes, fetchedUsers] = await Promise.all([
+          articleService.getArticles(),
+          videoService.getVideos(),
+          quizService.getQuizzes(),
+          userService.getUsers()
+        ]);
+        
+        setArticles(fetchedArticles);
+        setVideos(fetchedVideos);
+        setQuizzes(fetchedQuizzes);
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const users = userService.getUsers();
+  if (loading) {
+    return (
+      <DashboardLayout sidebarItems={sidebarItems} title="Admin Portal">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </DashboardLayout>
+    );
+  }
   
   return (
     <DashboardLayout sidebarItems={sidebarItems} title="Admin Portal">
