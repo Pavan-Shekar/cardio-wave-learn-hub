@@ -122,8 +122,12 @@ const Login = () => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+              <Button 
+                type="submit" 
+                className="w-full text-white bg-blue-600 hover:bg-blue-700 px-8 rounded-full text-lg" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Sign In"}
               </Button>
             </form>
           </CardContent>
