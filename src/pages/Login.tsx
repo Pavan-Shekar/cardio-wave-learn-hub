@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -122,11 +121,7 @@ const Login = () => {
                 </div>
               </div>
               
-              <Button 
-                type="submit" 
-                className="w-full text-white bg-blue-600 hover:bg-blue-700 px-8 rounded-full text-lg" 
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Sign In"}
               </Button>
             </form>
