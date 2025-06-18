@@ -47,17 +47,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         
         if (session?.user) {
-          // Fetch user profile from our profiles table
-          const profile = await supabaseService.getProfile(session.user.id);
-          if (profile) {
-            setCurrentUser({
-              id: profile.id,
-              name: profile.name,
-              email: profile.email,
-              role: profile.role as UserRole
-            });
-            setIsAuthenticated(true);
-          }
+          // Wait a bit for the profile to be created by the trigger
+          setTimeout(async () => {
+            const profile = await supabaseService.getProfile(session.user.id);
+            if (profile) {
+              setCurrentUser({
+                id: profile.id,
+                name: profile.name,
+                email: profile.email,
+                role: profile.role as UserRole
+              });
+              setIsAuthenticated(true);
+            } else {
+              console.error('Profile not found for user:', session.user.id);
+              setCurrentUser(null);
+              setIsAuthenticated(false);
+            }
+          }, 1000);
         } else {
           setCurrentUser(null);
           setIsAuthenticated(false);
@@ -84,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
+        console.error('Login error:', error);
         toast.error(error.message);
         return false;
       }
@@ -108,33 +115,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string, role: UserRole): Promise<boolean> => {
     try {
+      console.log('Starting registration with:', { name, email, role });
+      
       // For demo: if role is admin, email must contain "admin"
       if (role === "admin" && !email.includes("admin")) {
         toast.error("Admin accounts must use an email containing 'admin'");
         return false;
       }
 
+      // Basic validation
+      if (!name.trim()) {
+        toast.error("Name is required");
+        return false;
+      }
+
+      if (password.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        return false;
+      }
+
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           data: {
-            name,
-            role
-          }
+            name: name.trim(),
+            role: role || 'student'
+          },
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
 
       if (error) {
-        toast.error(error.message);
+        console.error('Registration error:', error);
+        
+        // Handle specific Supabase errors
+        if (error.message.includes('User already registered')) {
+          toast.error("An account with this email already exists. Please try logging in instead.");
+        } else if (error.message.includes('Invalid email')) {
+          toast.error("Please enter a valid email address.");
+        } else if (error.message.includes('Password')) {
+          toast.error("Password must be at least 6 characters long.");
+        } else {
+          toast.error(error.message || "Registration failed. Please try again.");
+        }
         return false;
       }
 
       if (data.user) {
-        toast.success("Registration successful! Please check your email to verify your account.");
+        console.log('User created successfully:', data.user.id);
+        
+        // Check if email confirmation is required
+        if (!data.session) {
+          toast.success("Registration successful! Please check your email to verify your account.");
+        } else {
+          toast.success("Registration successful!");
+        }
         return true;
       }
 
+      toast.error("Registration failed. Please try again.");
       return false;
     } catch (error) {
       console.error('Registration error:', error);
