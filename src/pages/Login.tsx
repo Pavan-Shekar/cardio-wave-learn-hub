@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { EcgAnimation } from "@/components/EcgAnimation";
+import { PasswordRequirements } from "@/components/PasswordRequirements";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "admin">("student");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   
   const navigate = useNavigate();
   const { login, isAuthenticated, currentUser } = useAuth();
@@ -95,7 +97,13 @@ const Login = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setShowPasswordRequirements(true)}
+                  onBlur={() => setShowPasswordRequirements(false)}
                   required
+                />
+                <PasswordRequirements 
+                  password={password} 
+                  showRequirements={showPasswordRequirements}
                 />
               </div>
               

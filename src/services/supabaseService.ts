@@ -7,6 +7,8 @@ export interface Profile {
   email: string;
   role: "student" | "admin";
   created_at: string;
+  approved: boolean;
+  pending_reason?: string;
 }
 
 export interface Article {

@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EcgAnimation } from "@/components/EcgAnimation";
+import { PasswordRequirements } from "@/components/PasswordRequirements";
+import { isPasswordValid } from "@/utils/passwordValidation";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -16,6 +19,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<"student" | "admin">("student");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   
   const navigate = useNavigate();
   const { register } = useAuth();
@@ -28,18 +32,22 @@ const Register = () => {
       return;
     }
     
+    if (!isPasswordValid(password)) {
+      toast.error("Password does not meet requirements");
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       const success = await register(name, email, password, role);
       
       if (success) {
-        toast.success("Registration successful!");
-        
-        // Navigate based on role
         if (role === "admin") {
-          navigate("/admin");
+          toast.success("Admin registration submitted! Please wait for approval before you can access the system.");
+          navigate("/login");
         } else {
+          toast.success("Registration successful!");
           navigate("/student");
         }
       } else {
@@ -104,7 +112,12 @@ const Register = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setShowPasswordRequirements(true)}
                   required
+                />
+                <PasswordRequirements 
+                  password={password} 
+                  showRequirements={showPasswordRequirements}
                 />
               </div>
               
@@ -141,9 +154,11 @@ const Register = () => {
                   </Button>
                 </div>
                 {role === "admin" && (
-                  <p className="text-xs text-amber-600 mt-1">
-                    Note: Admin accounts require an email containing "admin"
-                  </p>
+                  <Alert className="mt-2">
+                    <AlertDescription className="text-sm">
+                      <strong>Admin Registration:</strong> Your account will require approval from an existing administrator before you can access the system. You will be notified once your account is approved.
+                    </AlertDescription>
+                  </Alert>
                 )}
               </div>
               

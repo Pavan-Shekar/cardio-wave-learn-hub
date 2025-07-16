@@ -12,6 +12,8 @@ interface AuthUser {
   name: string;
   email: string;
   role: UserRole;
+  approved: boolean;
+  pending_reason?: string;
 }
 
 interface AuthContextType {
@@ -55,7 +57,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 id: profile.id,
                 name: profile.name,
                 email: profile.email,
-                role: profile.role as UserRole
+                role: profile.role as UserRole,
+                approved: profile.approved,
+                pending_reason: profile.pending_reason
               });
               setIsAuthenticated(true);
             } else {
@@ -103,6 +107,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await supabase.auth.signOut();
           return false;
         }
+        
+        // Check if user is approved
+        if (profile && !profile.approved) {
+          toast.error(profile.pending_reason || "Your account is pending approval. Please contact an administrator.");
+          await supabase.auth.signOut();
+          return false;
+        }
       }
 
       return true;
@@ -117,11 +128,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Starting registration with:', { name, email, role });
       
-      // For demo: if role is admin, email must contain "admin"
-      if (role === "admin" && !email.includes("admin")) {
-        toast.error("Admin accounts must use an email containing 'admin'");
-        return false;
-      }
 
       // Basic validation
       if (!name.trim()) {
@@ -129,10 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
-      if (password.length < 6) {
-        toast.error("Password must be at least 6 characters");
-        return false;
-      }
+      // Password validation will be handled by the form components
 
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
