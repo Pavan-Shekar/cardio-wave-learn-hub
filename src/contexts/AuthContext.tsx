@@ -168,11 +168,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.user) {
         console.log('User created successfully:', data.user.id);
         
-        // Check if email confirmation is required
-        if (!data.session) {
-          toast.success("Registration successful! Please check your email to verify your account.");
+        // Send admin approval email if user is registering as admin
+        if (role === 'admin') {
+          try {
+            const response = await fetch(`https://zoxexartardlpawstxjx.supabase.co/functions/v1/send-admin-approval-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpveGV4YXJ0YXJkbHBhd3N0eGp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyMjc4MDYsImV4cCI6MjA2MjgwMzgwNn0.132cIRTZxPoEbmE6cEXEQQNJAz3ueyyU5Hg9I6PuMcI`,
+              },
+              body: JSON.stringify({
+                user_id: data.user.id,
+                user_name: name.trim(),
+                user_email: email.trim(),
+              }),
+            });
+            
+            if (!response.ok) {
+              console.error('Failed to send admin approval email:', await response.text());
+              toast.error("Registration successful, but failed to send approval notification to admin.");
+            } else {
+              console.log('Admin approval email sent successfully');
+              toast.success("Admin registration submitted! An approval request has been sent to the administrator.");
+            }
+          } catch (error) {
+            console.error('Error sending admin approval email:', error);
+            toast.error("Registration successful, but failed to send approval notification to admin.");
+          }
         } else {
-          toast.success("Registration successful!");
+          // Check if email confirmation is required
+          if (!data.session) {
+            toast.success("Registration successful! Please check your email to verify your account.");
+          } else {
+            toast.success("Registration successful!");
+          }
         }
         return true;
       }
