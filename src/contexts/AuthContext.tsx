@@ -171,7 +171,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Send admin approval email if user is registering as admin
         if (role === 'admin') {
           try {
-            const response = await fetch(`https://zoxexartardlpawstxjx.supabase.co/functions/v1/send-admin-approval-email`, {
+            // For admin registrations, sign out immediately after registration
+            // so they don't get automatically logged in until approved
+            await supabase.auth.signOut();
+            
+            const response = await fetch(`https://zoxexartardlpawstxjx.functions.supabase.co/send-admin-approval-email`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -189,7 +193,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               toast.error("Registration successful, but failed to send approval notification to admin.");
             } else {
               console.log('Admin approval email sent successfully');
-              toast.success("Admin registration submitted! An approval request has been sent to the administrator.");
+              toast.success("Admin registration submitted! An approval request has been sent to the administrator. You will receive an email when your account is approved.");
             }
           } catch (error) {
             console.error('Error sending admin approval email:', error);

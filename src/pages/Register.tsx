@@ -44,7 +44,8 @@ const Register = () => {
       
       if (success) {
         if (role === "admin") {
-          navigate("/login");
+          // Stay on the page for admin registrations
+          // The approval notification has already been shown by the register function
         } else {
           navigate("/student");
         }

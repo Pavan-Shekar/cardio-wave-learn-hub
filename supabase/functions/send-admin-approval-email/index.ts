@@ -25,8 +25,8 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { user_id, user_name, user_email }: AdminApprovalRequest = await req.json();
 
-    const approvalUrl = `https://zoxexartardlpawstxjx.supabase.co/functions/v1/handle-admin-approval?action=approve&user_id=${user_id}`;
-    const rejectUrl = `https://zoxexartardlpawstxjx.supabase.co/functions/v1/handle-admin-approval?action=reject&user_id=${user_id}`;
+    const approvalUrl = `https://zoxexartardlpawstxjx.functions.supabase.co/handle-admin-approval?action=approve&user_id=${user_id}`;
+    const rejectUrl = `https://zoxexartardlpawstxjx.functions.supabase.co/handle-admin-approval?action=reject&user_id=${user_id}`;
 
     const emailResponse = await resend.emails.send({
       from: "ECG Education Portal <onboarding@resend.dev>",

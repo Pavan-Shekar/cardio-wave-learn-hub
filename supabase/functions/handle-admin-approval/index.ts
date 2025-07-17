@@ -23,6 +23,8 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response("Invalid action", { status: 400 });
     }
 
+    console.log(`Processing ${action} request for user ID: ${user_id}`);
+    
     // Get user profile
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
@@ -30,23 +32,36 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("id", user_id)
       .single();
 
-    if (profileError || !profile) {
-      return new Response("User not found", { status: 404 });
+    if (profileError) {
+      console.error("Error fetching profile:", profileError);
+      return new Response(`Error fetching user profile: ${profileError.message}`, { status: 500 });
     }
+    
+    if (!profile) {
+      console.error("Profile not found for user ID:", user_id);
+      return new Response("User profile not found. The user ID may be invalid or the user may have been deleted.", { status: 404 });
+    }
+    
+    console.log("Found profile:", profile);
 
     // Update user approval status
-    const { error: updateError } = await supabase
+    console.log(`Updating user ${user_id} approval status to: ${action === "approve" ? "approved" : "rejected"}`);
+    
+    const { data: updateData, error: updateError } = await supabase
       .from("profiles")
       .update({
         approved: action === "approve",
         pending_reason: action === "approve" ? null : "Admin registration was rejected by administrator"
       })
-      .eq("id", user_id);
+      .eq("id", user_id)
+      .select();
 
     if (updateError) {
       console.error("Error updating user approval:", updateError);
-      return new Response("Error updating user status", { status: 500 });
+      return new Response(`Error updating user status: ${updateError.message}`, { status: 500 });
     }
+    
+    console.log("Profile updated successfully:", updateData);
 
     // Send notification email to the user
     const subject = action === "approve" 
@@ -74,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color: #333; margin: 15px 0;">You can now log in to the ECG Education Portal with full administrator privileges.</p>
             
             <div style="text-align: center; margin: 20px 0;">
-              <a href="https://zoxexartardlpawstxjx.supabase.app/login" 
+              <a href="https://4ff00fd9-0b20-4470-88ec-a22aac3db1e5.lovableproject.com/login" 
                  style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">
                 Login to Admin Portal
               </a>
@@ -113,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color: #333; margin: 15px 0;">You can still register and use the portal as a student user to access learning materials.</p>
             
             <div style="text-align: center; margin: 20px 0;">
-              <a href="https://zoxexartardlpawstxjx.supabase.app/register" 
+              <a href="https://4ff00fd9-0b20-4470-88ec-a22aac3db1e5.lovableproject.com/register" 
                  style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">
                 Register as Student
               </a>
@@ -147,17 +162,23 @@ const handler = async (req: Request): Promise<Response> => {
           <title>Admin Approval - ECG Education Portal</title>
           <style>
             body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-            .success { background-color: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #2563eb; }
-            .button { display: inline-block; background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+            .success { background-color: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #2563eb; margin-bottom: 20px; }
+            .button { display: inline-block; background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; margin-right: 10px; }
+            .buttons { margin-top: 20px; }
           </style>
         </head>
         <body>
           <div class="success">
             <h1>Action Completed Successfully</h1>
             <p>${successMessage}</p>
-            <a href="https://zoxexartardlpawstxjx.supabase.co/project/zoxexartardlpawstxjx/auth/users" class="button">
-              View Users in Supabase Dashboard
-            </a>
+            <div class="buttons">
+              <a href="https://4ff00fd9-0b20-4470-88ec-a22aac3db1e5.lovableproject.com/login" class="button">
+                Go to Application
+              </a>
+              <a href="https://zoxexartardlpawstxjx.supabase.co/project/zoxexartardlpawstxjx/auth/users" class="button">
+                View Users in Supabase
+              </a>
+            </div>
           </div>
         </body>
       </html>
