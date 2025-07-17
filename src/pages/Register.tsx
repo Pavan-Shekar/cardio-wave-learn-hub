@@ -44,14 +44,10 @@ const Register = () => {
       
       if (success) {
         if (role === "admin") {
-          toast.success("Admin registration submitted! Please wait for approval before you can access the system.");
           navigate("/login");
         } else {
-          toast.success("Registration successful!");
           navigate("/student");
         }
-      } else {
-        toast.error("Registration failed. Please try again.");
       }
     } catch (error) {
       toast.error("An error occurred during registration.");

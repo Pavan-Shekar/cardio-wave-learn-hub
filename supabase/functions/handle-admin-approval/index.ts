@@ -3,11 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { Resend } from "npm:resend@2.0.0";
 
 const supabase = createClient(
-  Deno.env.get("SUPABASE_URL") ?? "",
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  "https://zoxexartardlpawstxjx.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpveGV4YXJ0YXJkbHBhd3N0eGp4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzIyNzgwNiwiZXhwIjoyMDYyODAzODA2fQ.wXOdSECRJLeiOFnC8FECccNL8bjm7_wbJBwnS-MkQAM"
 );
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const resend = new Resend("re_QnEqYdfm_8SeLcXSFS8nJQ8r24p5c7TRG");
 
 const handler = async (req: Request): Promise<Response> => {
   try {
@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color: #333; margin: 15px 0;">You can now log in to the ECG Education Portal with full administrator privileges.</p>
             
             <div style="text-align: center; margin: 20px 0;">
-              <a href="${Deno.env.get("SUPABASE_URL")?.replace("supabase.co", "supabase.app") || "https://your-app-url.com"}/login" 
+              <a href="https://zoxexartardlpawstxjx.supabase.app/login" 
                  style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">
                 Login to Admin Portal
               </a>
@@ -113,7 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color: #333; margin: 15px 0;">You can still register and use the portal as a student user to access learning materials.</p>
             
             <div style="text-align: center; margin: 20px 0;">
-              <a href="${Deno.env.get("SUPABASE_URL")?.replace("supabase.co", "supabase.app") || "https://your-app-url.com"}/register" 
+              <a href="https://zoxexartardlpawstxjx.supabase.app/register" 
                  style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500;">
                 Register as Student
               </a>
